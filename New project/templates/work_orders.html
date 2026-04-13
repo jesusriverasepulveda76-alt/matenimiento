@@ -1,0 +1,112 @@
+﻿{% extends "base.html" %}
+{% block title %}OT | Sistema de Mantencion{% endblock %}
+{% block content %}
+<section class="card">
+    <h2>Crear Orden de Trabajo (OT)</h2>
+    {% if is_planner_or_supervisor %}
+    <form method="post" class="form-grid">
+        <label>
+            Numero OT *
+            <input type="text" name="ot_number" placeholder="OT-2026-001" required>
+        </label>
+        <label>
+            Tipo de mantencion *
+            <select name="maintenance_type" required>
+                {% for t in maintenance_types %}
+                    <option value="{{ t }}">{{ t }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            Estado *
+            <select name="status" required>
+                {% for s in statuses %}
+                    <option value="{{ s }}">{{ s }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            Activo *
+            <select name="asset_id" required>
+                {% for row in assets %}
+                    <option value="{{ row['id'] }}">{{ row["code"] }} - {{ row["name"] }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            Solicitado por
+            <input type="text" name="requested_by" placeholder="Supervisor turno A">
+        </label>
+        <label>
+            Asignado a
+            <input type="text" name="assigned_to" placeholder="Tecnico asignado">
+        </label>
+        <label>
+            Fecha apertura *
+            <input type="date" name="opened_at" value="{{ today }}" required>
+        </label>
+        <label>
+            Fecha compromiso
+            <input type="date" name="due_date">
+        </label>
+        <label class="span-2">
+            Descripcion
+            <textarea name="description" rows="3" placeholder="Detalle del trabajo"></textarea>
+        </label>
+        <div class="form-actions span-2">
+            <button type="submit">Guardar OT</button>
+        </div>
+    </form>
+    {% else %}
+        <p class="muted">Tu rol no puede crear o cerrar OT. Solo planificador o supervisor.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>Listado OT</h2>
+    {% if work_orders %}
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>OT</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Activo</th>
+                        <th>Apertura</th>
+                        <th>Vencimiento</th>
+                        <th>Cierre</th>
+                        <th>Accion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in work_orders %}
+                        <tr>
+                            <td>{{ row["ot_number"] }}</td>
+                            <td>{{ row["maintenance_type"] }}</td>
+                            <td>{{ row["status"] }}</td>
+                            <td>{{ row["asset_code"] }} - {{ row["asset_name"] }}</td>
+                            <td>{{ row["opened_at"] }}</td>
+                            <td>{{ row["due_date"] or "-" }}</td>
+                            <td>{{ row["closed_at"] or "-" }}</td>
+                            <td>
+                                {% if row["status"] != "closed" and is_planner_or_supervisor %}
+                                    <form method="post" action="{{ url_for('close_work_order', work_order_id=row['id']) }}">
+                                        <button class="secondary" type="submit">Cerrar OT</button>
+                                    </form>
+                                {% elif row["status"] == "closed" %}
+                                    <span class="muted">Completada</span>
+                                {% else %}
+                                    <span class="muted">Sin permiso</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="muted">Sin OT registradas.</p>
+    {% endif %}
+</section>
+{% endblock %}

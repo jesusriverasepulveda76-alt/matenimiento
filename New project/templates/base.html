@@ -1,0 +1,67 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0f766e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Mant OT">
+    <title>{% block title %}Sistema de Mantencion{% endblock %}</title>
+    <link rel="manifest" href="{{ url_for('manifest') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script defer src="{{ url_for('static', filename='pwa.js') }}"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <div class="brand">
+                <a href="{{ url_for('dashboard') if current_user else url_for('login') }}">Sistema Mantencion OT</a>
+            </div>
+            {% if current_user %}
+                <nav class="main-nav">
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('assets') }}">Activos</a>
+                    <a href="{{ url_for('work_orders') }}">OT</a>
+                    <a href="{{ url_for('measurements') }}">Mediciones</a>
+                    <a href="{{ url_for('failures') }}">Fallas</a>
+                    {% if is_supervisor %}
+                        <a href="{{ url_for('users_page') }}">Usuarios</a>
+                    {% endif %}
+                </nav>
+                <div class="user-zone">
+                    <a class="user-link" href="{{ url_for('profile') }}">
+                        {{ current_user["full_name"] }} ({{ role_labels.get(current_user["role"], current_user["role"]) }})
+                    </a>
+                    <form method="post" action="{{ url_for('logout') }}">
+                        <button class="secondary" type="submit">Salir</button>
+                    </form>
+                </div>
+            {% else %}
+                <div class="user-zone">
+                    <a class="user-link" href="{{ url_for('login') }}">Ingresar</a>
+                </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="install-tip" class="install-tip hidden">
+            Para instalar en iPhone: Safari -> Compartir -> Agregar a pantalla de inicio.
+        </section>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <section class="flash-wrapper">
+                    {% for category, message in messages %}
+                        <article class="flash {{ category }}">{{ message }}</article>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

@@ -1,0 +1,76 @@
+﻿{% extends "base.html" %}
+{% block title %}Usuarios | Sistema de Mantencion{% endblock %}
+{% block content %}
+<section class="card">
+    <h2>Crear usuario</h2>
+    <form method="post" class="form-grid">
+        <label>
+            Usuario *
+            <input type="text" name="username" required placeholder="operador1">
+        </label>
+        <label>
+            Nombre completo *
+            <input type="text" name="full_name" required placeholder="Nombre Apellido">
+        </label>
+        <label>
+            Rol *
+            <select name="role" required>
+                {% for role in roles %}
+                    <option value="{{ role }}">{{ role_labels.get(role, role) }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            Clave inicial *
+            <input type="password" name="password" minlength="8" required placeholder="minimo 8 caracteres">
+        </label>
+        <div class="form-actions span-2">
+            <button type="submit">Crear usuario</button>
+        </div>
+    </form>
+</section>
+
+<section class="card">
+    <h2>Usuarios del sistema</h2>
+    {% if users %}
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Ultimo login</th>
+                        <th>Accion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in users %}
+                        <tr>
+                            <td>{{ row["username"] }}</td>
+                            <td>{{ row["full_name"] }}</td>
+                            <td>{{ role_labels.get(row["role"], row["role"]) }}</td>
+                            <td>{{ "Activo" if row["is_active"] == 1 else "Inactivo" }}</td>
+                            <td>{{ row["last_login_at"] or "-" }}</td>
+                            <td>
+                                {% if row['id'] == current_user['id'] %}
+                                    <span class="muted">Sesion actual</span>
+                                {% else %}
+                                    <form method="post" action="{{ url_for('toggle_user', user_id=row['id']) }}">
+                                        <button class="secondary" type="submit">
+                                            {% if row["is_active"] == 1 %}Desactivar{% else %}Activar{% endif %}
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="muted">No hay usuarios registrados.</p>
+    {% endif %}
+</section>
+{% endblock %}
