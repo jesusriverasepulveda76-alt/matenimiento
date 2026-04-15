@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+
+maintenance.db
+maintenance.db-journal
+bin_test.bin
+write_test.txt
+
+.env
+.venv/
+venv/
